@@ -1,0 +1,11 @@
+ACTIVE_PROFILE: test
+
+PRIVATE_KEY: "private.key"
+PUBLIC_KEY: "public.key"
+POSTGRES_USERNAME: user
+POSTGRES_PASSWORD: password
+POSTGRES_HOST: 127.0.0.1
+POSTGRES_DATABASE: localdb
+
+SERVER_PORT: 8080
+UI_APP_URL: http://localhost:3000/

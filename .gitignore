@@ -1,0 +1,74 @@
+# === General ===
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*.DS_Store
+.env
+.env.*
+*.orig
+Thumbs.db
+ehthumbs.db
+$RECYCLE.BIN/
+*.stackdump
+*.sublime-*
+
+# === IDEs ===
+
+# IntelliJ
+.idea/
+*.iws
+*.iml
+*.ipr
+.sts4-cache/
+
+# VS Code
+.vscode/
+
+# Eclipse
+.metadata
+.classpath
+.project
+.settings/
+.apt_generated/
+.factorypath
+.springBeans
+
+# === Java / Maven / Spring Boot ===
+/backend/target/
+dependency-reduced-pom.xml
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+buildNumber.properties
+.mvn/timing.properties
+/backend/.mvn/wrapper/maven-wrapper.jar
+
+# Application config
+/backend/application.yml
+/backend/application.properties
+/backend/application-*.yml
+/backend/application-*.properties
+
+# === Angular / Node.js ===
+/frontend/node_modules/
+/frontend/dist/
+/frontend/.angular/
+/frontend/.angular/cache/
+/frontend/.env
+/frontend/package-lock.json
+/frontend/yarn.lock
+/frontend/.output/
+/frontend/src/environments/
+
+# === OS-specific ===
+[Dd]esktop.ini
+*.lnk
+
+# === Misc build ===
+bin/
+build/
+scratch/
