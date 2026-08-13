@@ -72,3 +72,10 @@ buildNumber.properties
 bin/
 build/
 scratch/
+
+
+# === Spring configurations ===
+
+**/src/main/resources/application-dev.yml
+**/src/main/resources/application-prod.yaml
+**/src/main/resources/application-test.yaml
