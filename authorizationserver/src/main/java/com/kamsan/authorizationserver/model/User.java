@@ -9,8 +9,4 @@ import lombok.*;
 public class User {
 
     private String userUUID;
-
-    public String getUserUUID() {
-        return userUUID;
-    }
 }

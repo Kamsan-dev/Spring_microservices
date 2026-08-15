@@ -9,7 +9,6 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.OAuth2RefreshToken;
 import org.springframework.security.oauth2.core.OAuth2Token;
@@ -27,13 +26,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.http.HttpMethod.PUT;
-import static org.springframework.http.HttpMethod.PATCH;
-import static org.springframework.http.HttpMethod.OPTIONS;
-import static org.springframework.http.HttpMethod.DELETE;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,12 +33,14 @@ import java.util.stream.Collectors;
 import static org.apache.hc.core5.http.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpHeaders.*;
+import static org.springframework.http.HttpMethod.*;
 import static org.springframework.security.oauth2.server.authorization.OAuth2TokenType.ACCESS_TOKEN;
 
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class AuthorizationServerConfig {
+    private final JwtConfiguration jwtConfiguration;
 
     @Bean
     @Order(1)
@@ -54,17 +48,15 @@ public class AuthorizationServerConfig {
         http.cors(httpSecurityCorsConfigurer -> httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource()));
 
         return http.oauth2AuthorizationServer(authorizationServer -> {
-            http
-                    .securityMatcher(authorizationServer.getEndpointsMatcher())
-                    .with(authorizationServer, Customizer.withDefaults())
-                    .exceptionHandling(e -> e.accessDeniedPage("/accessdenied")
-                            .defaultAuthenticationEntryPointFor(new LoginUrlAuthenticationEntryPoint("/login"), new MediaTypeRequestMatcher(MediaType.TEXT_HTML)));
+            http.securityMatcher(authorizationServer.getEndpointsMatcher())
+                .with(authorizationServer, Customizer.withDefaults())
+                .exceptionHandling(e -> e.accessDeniedPage("/accessdenied")
+                                         .defaultAuthenticationEntryPointFor(new LoginUrlAuthenticationEntryPoint("/login"), new MediaTypeRequestMatcher(MediaType.TEXT_HTML)));
 
             authorizationServer.tokenGenerator(tokenGenerator()).clientAuthentication(authentication -> {
                 authentication.authenticationConverter(null);
                 authentication.authenticationProvider(null);
             }).oidc(Customizer.withDefaults());
-
         }).build();
     }
 
@@ -72,7 +64,6 @@ public class AuthorizationServerConfig {
     public RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
         return new JdbcRegisteredClientRepository(jdbcTemplate);
     }
-
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -88,7 +79,6 @@ public class AuthorizationServerConfig {
         return source;
     }
 
-
     /**
      * Ce bean indique à Spring Authorization Server comment générer les différents tokens OAuth2, notamment l'access-token  et le refresh-token.
      * DelegatingOAuth2TokenGenerator va regarder quel type de token Spring lui demande et déléguer la génération au composant approprié.
@@ -97,7 +87,7 @@ public class AuthorizationServerConfig {
      */
     @Bean
     public OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator() {
-        var jwtGenerator = UserJwtGenerator.init((new NimbusJwtEncoder(null)));
+        var jwtGenerator = UserJwtGenerator.init((new NimbusJwtEncoder(jwtConfiguration.jwkSource())));
         /*
         setJwtCustomizer est appelé pour personnaliser l'access-token et ajouter des claims nécessaires.
          */
@@ -116,6 +106,10 @@ public class AuthorizationServerConfig {
     }
 
     private String getAuthorities(JwtEncodingContext context) {
-        return context.getPrincipal().getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
+        return context.getPrincipal()
+                      .getAuthorities()
+                      .stream()
+                      .map(GrantedAuthority::getAuthority)
+                      .collect(Collectors.joining(","));
     }
 }
