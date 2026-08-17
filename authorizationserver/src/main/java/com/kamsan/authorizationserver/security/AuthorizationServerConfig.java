@@ -44,7 +44,7 @@ public class AuthorizationServerConfig {
 
     @Bean
     @Order(1)
-    public SecurityFilterChain authorizationServiceConfig(HttpSecurity http, RegisteredClientRepository registeredClientRepository) throws Exception {
+    public SecurityFilterChain authorizationServiceConfig(HttpSecurity http, RegisteredClientRepository registeredClientRepository) {
         http.cors(httpSecurityCorsConfigurer -> httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource()));
 
         return http.oauth2AuthorizationServer(authorizationServer -> {
@@ -52,11 +52,12 @@ public class AuthorizationServerConfig {
                 .with(authorizationServer, Customizer.withDefaults())
                 .exceptionHandling(e -> e.accessDeniedPage("/accessdenied")
                                          .defaultAuthenticationEntryPointFor(new LoginUrlAuthenticationEntryPoint("/login"), new MediaTypeRequestMatcher(MediaType.TEXT_HTML)));
-
-            authorizationServer.tokenGenerator(tokenGenerator()).clientAuthentication(authentication -> {
-                authentication.authenticationConverter(null);
-                authentication.authenticationProvider(null);
-            }).oidc(Customizer.withDefaults());
+            authorizationServer
+                    .tokenGenerator(tokenGenerator())
+                    .clientAuthentication(authentication -> {
+                        authentication.authenticationConverter(new ClientRefreshTokenAuthenticationConverter());
+                        authentication.authenticationProvider(new ClientAuthenticationProvider(registeredClientRepository));
+                    }).oidc(Customizer.withDefaults());
         }).build();
     }
 
@@ -92,7 +93,7 @@ public class AuthorizationServerConfig {
         setJwtCustomizer est appelé pour personnaliser l'access-token et ajouter des claims nécessaires.
          */
         jwtGenerator.setJwtCustomizer(customizer());
-        OAuth2TokenGenerator<OAuth2RefreshToken> oAuth2RefreshTokenOAuth2TokenGenerator = null;
+        OAuth2TokenGenerator<OAuth2RefreshToken> oAuth2RefreshTokenOAuth2TokenGenerator = new ClientOAuth2RefreshTokenGenerator();
         return new DelegatingOAuth2TokenGenerator(jwtGenerator, oAuth2RefreshTokenOAuth2TokenGenerator);
     }
 
