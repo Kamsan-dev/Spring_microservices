@@ -14,9 +14,4 @@ public class MfaAuthentication extends AnonymousAuthenticationToken {
         super("anonymous", "anonymous", createAuthorityList("ROLE_ANONYMOUS", authority));
         this.primaryAuthentication = authentication;
     }
-
-    @Override
-    public Object getPrincipal() {
-        return this.primaryAuthentication;
-    }
 }

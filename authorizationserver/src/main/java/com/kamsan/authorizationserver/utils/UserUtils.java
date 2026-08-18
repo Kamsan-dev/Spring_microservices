@@ -1,11 +1,19 @@
 package com.kamsan.authorizationserver.utils;
 
 import com.kamsan.authorizationserver.model.User;
+import dev.samstevens.totp.code.CodeGenerator;
+import dev.samstevens.totp.code.CodeVerifier;
+import dev.samstevens.totp.code.DefaultCodeGenerator;
+import dev.samstevens.totp.code.DefaultCodeVerifier;
+import dev.samstevens.totp.time.SystemTimeProvider;
+import dev.samstevens.totp.time.TimeProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeRequestAuthenticationToken;
 
 public class UserUtils {
+    private UserUtils() {
+    }
 
     public static User getUser(Authentication authentication) {
         if (authentication instanceof OAuth2AuthorizationCodeRequestAuthenticationToken) {
@@ -13,5 +21,12 @@ public class UserUtils {
             return (User) usernamePasswordAuthenticationToken.getPrincipal();
         }
         return (User) authentication.getPrincipal();
+    }
+
+    public static boolean verifyQrCode(String secret, String code) {
+        TimeProvider timeProvider = new SystemTimeProvider();
+        CodeGenerator codeGenerator = new DefaultCodeGenerator();
+        CodeVerifier codeVerifier = new DefaultCodeVerifier(codeGenerator, timeProvider);
+        return codeVerifier.isValidCode(secret, code);
     }
 }
