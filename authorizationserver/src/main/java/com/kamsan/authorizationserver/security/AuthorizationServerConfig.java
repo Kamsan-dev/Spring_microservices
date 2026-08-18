@@ -15,12 +15,17 @@ import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.token.DelegatingOAuth2TokenGenerator;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+import org.springframework.security.web.authentication.logout.CookieClearingLogoutHandler;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -59,6 +64,25 @@ public class AuthorizationServerConfig {
                         authentication.authenticationProvider(new ClientAuthenticationProvider(registeredClientRepository));
                     }).oidc(Customizer.withDefaults());
         }).build();
+    }
+
+    @Bean
+    @Order(2)
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
+        http.cors(httpSecurityCorsConfigurer -> httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource()));
+
+        http.authorizeHttpRequests(authorize -> authorize
+                .requestMatchers("/login").permitAll()
+                .requestMatchers(POST, "/logout").permitAll()
+                .requestMatchers("/mfa").hasAuthority("MFA_REQUIRED")
+                .anyRequest().authenticated());
+        http.formLogin(login -> login
+                .loginPage("/login")
+                .successHandler(new MfaAuthenticationHandler("/mfa", "MFA_REQUIRED"))
+                .failureHandler(new SimpleUrlAuthenticationFailureHandler("/login?error")));
+        http.logout(logout -> logout.logoutSuccessUrl("http://localhost:3000")
+                                    .addLogoutHandler(new CookieClearingLogoutHandler("JSESSIONID")));
+        return http.build();
     }
 
     @Bean
@@ -104,6 +128,16 @@ public class AuthorizationServerConfig {
                 context.getClaims().claims(claims -> claims.put("authorities", getAuthorities(context)));
             }
         };
+    }
+
+    @Bean
+    public AuthenticationSuccessHandler authenticationSuccessHandler() {
+        return new SavedRequestAwareAuthenticationSuccessHandler();
+    }
+
+    @Bean
+    public AuthorizationServerSettings authorizationServerSettings() {
+        return AuthorizationServerSettings.builder().build();
     }
 
     private String getAuthorities(JwtEncodingContext context) {
