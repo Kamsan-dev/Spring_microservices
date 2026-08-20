@@ -20,6 +20,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
     void setLastLogin(Long userId);
 
     void addLoginDevice(Long userId, String deviceName, String client, String ipAddress);
-
-    boolean isValidQRCode(String userPublicId, String code);
 }

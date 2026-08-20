@@ -34,7 +34,6 @@ import java.util.Date;
 import java.util.UUID;
 
 public class UserJwtGenerator implements OAuth2TokenGenerator<Jwt> {
-
     private final JwtEncoder jwtEncoder;
     private @Nullable OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer;
     private Clock clock = Clock.systemUTC();
@@ -73,7 +72,7 @@ public class UserJwtGenerator implements OAuth2TokenGenerator<Jwt> {
             Assert.notNull(authorizationGrantType, "authorizationGrantType cannot be null");
             JwtClaimsSet.Builder claimsBuilder = JwtClaimsSet.builder()
                                                              .issuer(issuer)
-                                                             .subject(user.getUserUUID())
+                                                             .subject(user.getPublicId().toString())
                                                              .audience(Collections.singletonList(registeredClient.getClientId()))
                                                              .issuedAt(issuedAt)
                                                              .expiresAt(expiresAt)
