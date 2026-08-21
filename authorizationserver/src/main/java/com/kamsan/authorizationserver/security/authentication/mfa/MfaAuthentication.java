@@ -1,4 +1,4 @@
-package com.kamsan.authorizationserver.security;
+package com.kamsan.authorizationserver.security.authentication.mfa;
 
 import lombok.Getter;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;

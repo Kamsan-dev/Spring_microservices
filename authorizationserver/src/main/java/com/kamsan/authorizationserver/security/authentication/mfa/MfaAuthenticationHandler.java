@@ -1,4 +1,4 @@
-package com.kamsan.authorizationserver.security;
+package com.kamsan.authorizationserver.security.authentication.mfa;
 
 import com.kamsan.authorizationserver.model.User;
 import jakarta.servlet.ServletException;

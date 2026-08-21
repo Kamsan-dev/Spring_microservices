@@ -1,4 +1,4 @@
-package com.kamsan.authorizationserver.security;
+package com.kamsan.authorizationserver.security.authentication.client;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jspecify.annotations.Nullable;

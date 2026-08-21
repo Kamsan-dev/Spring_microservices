@@ -1,5 +1,6 @@
-package com.kamsan.authorizationserver.security;
+package com.kamsan.authorizationserver.security.config;
 
+import com.kamsan.authorizationserver.security.key.RSAKeyManager;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;

@@ -1,4 +1,4 @@
-package com.kamsan.authorizationserver.security;
+package com.kamsan.authorizationserver.security.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

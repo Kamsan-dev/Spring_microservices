@@ -1,5 +1,10 @@
-package com.kamsan.authorizationserver.security;
+package com.kamsan.authorizationserver.security.config;
 
+import com.kamsan.authorizationserver.security.authentication.client.ClientAuthenticationProvider;
+import com.kamsan.authorizationserver.security.authentication.client.ClientRefreshTokenAuthenticationConverter;
+import com.kamsan.authorizationserver.security.authentication.mfa.MfaAuthenticationHandler;
+import com.kamsan.authorizationserver.security.token.ClientOAuth2RefreshTokenGenerator;
+import com.kamsan.authorizationserver.security.token.UserJwtGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;

@@ -1,4 +1,4 @@
-package com.kamsan.authorizationserver.security;
+package com.kamsan.authorizationserver.security.authentication.user;
 
 import com.kamsan.authorizationserver.model.User;
 import com.kamsan.authorizationserver.service.implementation.UserServiceImpl;

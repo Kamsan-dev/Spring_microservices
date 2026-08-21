@@ -1,7 +1,7 @@
 package com.kamsan.authorizationserver.controller;
 
 import com.kamsan.authorizationserver.model.User;
-import com.kamsan.authorizationserver.security.MfaAuthentication;
+import com.kamsan.authorizationserver.security.authentication.mfa.MfaAuthentication;
 import com.kamsan.authorizationserver.service.UserService;
 import com.kamsan.authorizationserver.sharedkernel.exception.ApiException;
 import jakarta.servlet.RequestDispatcher;

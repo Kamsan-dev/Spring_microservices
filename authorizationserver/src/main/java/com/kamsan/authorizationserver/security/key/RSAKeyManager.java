@@ -1,4 +1,4 @@
-package com.kamsan.authorizationserver.security;
+package com.kamsan.authorizationserver.security.key;
 
 import com.kamsan.authorizationserver.sharedkernel.exception.ApiException;
 import com.nimbusds.jose.jwk.RSAKey;

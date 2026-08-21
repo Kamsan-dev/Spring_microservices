@@ -1,4 +1,4 @@
-package com.kamsan.authorizationserver.security;
+package com.kamsan.authorizationserver.security.authentication.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

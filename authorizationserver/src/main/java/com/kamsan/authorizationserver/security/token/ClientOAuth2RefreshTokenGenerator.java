@@ -1,4 +1,4 @@
-package com.kamsan.authorizationserver.security;
+package com.kamsan.authorizationserver.security.token;
 
 import lombok.NoArgsConstructor;
 import org.jspecify.annotations.Nullable;
