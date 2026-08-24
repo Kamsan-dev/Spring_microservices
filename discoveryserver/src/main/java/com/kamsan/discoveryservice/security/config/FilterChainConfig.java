@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
 import static com.kamsan.discoveryservice.constants.Roles.APP_READ;
@@ -14,6 +15,7 @@ import static com.kamsan.discoveryservice.constants.Roles.APP_READ;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
+@EnableWebSecurity
 public class FilterChainConfig {
     private final DiscoveryUserDetailsService discoveryUserDetailsService;
 

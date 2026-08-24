@@ -51,6 +51,7 @@ import static org.springframework.security.oauth2.server.authorization.OAuth2Tok
 @RequiredArgsConstructor
 public class AuthorizationServerConfig {
     private final JwtConfiguration jwtConfiguration;
+    private static final String AUTHORITY_KEY = "authorities";
 
     @Bean
     @Order(1)
@@ -130,7 +131,7 @@ public class AuthorizationServerConfig {
     public OAuth2TokenCustomizer<JwtEncodingContext> customizer() {
         return context -> {
             if (ACCESS_TOKEN.equals(context.getTokenType())) {
-                context.getClaims().claims(claims -> claims.put("authorities", getAuthorities(context)));
+                context.getClaims().claims(claims -> claims.put(AUTHORITY_KEY, getAuthorities(context)));
             }
         };
     }

@@ -2,7 +2,6 @@ package com.kamsan.discoveryservice.security.config;
 
 import com.kamsan.discoveryservice.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -13,7 +12,6 @@ import static org.springframework.security.core.authority.AuthorityUtils.commaSe
 
 @Service
 @RequiredArgsConstructor
-@EnableWebSecurity
 public class DiscoveryUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
