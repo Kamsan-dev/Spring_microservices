@@ -1,44 +1,46 @@
 spring:
   application:
-    name: discoveryservice
+    name: gateway
   profiles:
     active: ${ACTIVE_PROFILE:dev}
-  datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}
-    username: ${POSTGRES_USERNAME}
-    password: ${POSTGRES_PASSWORD}
-    hikari:
-      connection-test-query: SELECT 1
-  jpa:
-    database: POSTGRESQL
-    open-in-view: false
-    database-plateform: org.hibernate.dialect.PostgresSQL82Dialect
-    generate-ddl: false
-    show-sql: true
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        default_schema: ${POSTGRES_DATABASE}
-        dialect: org.hibernate.dialect.PostgresSQL82Dialect
-        format_sql: true
+  cloud:
+    discovery:
+      enabled: true
+    gateway:
+      mvc:
+        routes:
+          - id: authorization-server
+            uri: lb://AUTHORIZATIONSERVER
+            predicates:
+              - Path=/authorization/**
 
+          - id: user-service
+            uri: lb://USERSERVICE
+            predicates:
+              - Path=/user/**
+
+          - id: ticket-service
+            uri: lb://TICKETSERVICE
+            predicates:
+              - Path=/ticket/**
+
+          - id: notification-service
+            uri: lb://NOTIFICATIONSERVICE
+            predicates:
+              - Path=/notification/**
 
 eureka:
   instance:
-    hostname: localhost
     prefer-ip-address: true
   client:
     service-url:
-      defaultZone: http://${USER_NAME}:${PASSWORD}@${eureka.instance.hostname}:${server.port}/eureka/
+      defaultZone: http://${USER_NAME}:${PASSWORD}@localhost:5002/eureka/
     fetch-registry: false
     register-with-eureka: false
-  server:
-    enable-self-preservation: false
-    renewal-percent-threshold: 0.33
-    wait-time-in-ms-when-sync-empty: 0
-    peer-node-read-timeout-ms: 30000
 
 
 server:
   port: ${SERVER_PORT}
+
+jwks:
+  uri: ${JWKS_URI}

@@ -1,6 +1,6 @@
 spring:
   application:
-    name: authorization-server
+    name: AUTHORIZATIONSERVER
   cloud:
     discovery:
       enabled: true

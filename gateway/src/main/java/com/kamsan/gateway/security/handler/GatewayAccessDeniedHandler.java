@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+import static com.kamsan.gateway.utils.RequestUtils.handleErrorResponse;
+
 @Component
 public class GatewayAccessDeniedHandler implements AccessDeniedHandler {
     @Override
