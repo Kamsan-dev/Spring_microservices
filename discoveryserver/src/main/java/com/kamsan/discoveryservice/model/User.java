@@ -1,5 +1,9 @@
 package com.kamsan.discoveryservice.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,28 +16,33 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity
+@Table(name = "users")
 public class User {
+    @Id
     private Long userId;
-    private UUID publicId;
+    private UUID userPublicId;
     private String email;
-    private String password;
     private String firstName;
     private String lastName;
     private String memberId;
     private String username;
     private String bio;
     private String imageUrl;
-    private boolean isUsingMFA;
+    private boolean isUsingMfa;
     private String qrCodeImageUri;
     private String qrCodeSecret;
-    private String lastLogin;
+    private OffsetDateTime lastLogin;
     private int loginAttempts;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
+
+    @Transient
     private String role;
+    @Transient
     private String authorities;
+
     private boolean isAccountExpired;
     private boolean isAccountLocked;
-    private boolean isCredentialsExpired;
     private boolean isAccountEnabled;
 }

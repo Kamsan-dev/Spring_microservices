@@ -24,7 +24,7 @@ public class User {
     private boolean isUsingMFA;
     private String qrCodeImageUri;
     private String qrCodeSecret;
-    private String lastLogin;
+    private OffsetDateTime lastLogin;
     private int loginAttempts;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
