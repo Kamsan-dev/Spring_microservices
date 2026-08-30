@@ -30,12 +30,13 @@ public class Application {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
-
+    
     @Bean
     public ApplicationRunner runner(RegisteredClientRepository registeredClientRepository) {
         return args -> {
             if (registeredClientRepository.findByClientId("client") == null) {
                 try {
+                    log.info("redirect uri : {}", this.redirectUri);
                     var registerClient = RegisteredClient.withId(randomUUID().toString())
                                                          .clientId("client")
                                                          .clientSecret("secret")
@@ -52,7 +53,9 @@ public class Application {
                                                          .redirectUri(redirectUri)
                                                          .postLogoutRedirectUri("http://127.0.0.1:8080")
                                                          .clientSettings(ClientSettings.builder()
-                                                                                       .requireAuthorizationConsent(true)
+                                                                                       .requireAuthorizationConsent(
+                                                                                               false)
+                                                                                       .requireProofKey(true)
                                                                                        .build())
                                                          .tokenSettings(TokenSettings.builder()
                                                                                      .refreshTokenTimeToLive(Duration.ofDays(

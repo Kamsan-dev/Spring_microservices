@@ -55,20 +55,27 @@ public class AuthorizationServerConfig {
 
     @Bean
     @Order(1)
-    public SecurityFilterChain authorizationServiceConfig(HttpSecurity http, RegisteredClientRepository registeredClientRepository) {
+    public SecurityFilterChain oauth2ServerConfig(HttpSecurity http, RegisteredClientRepository registeredClientRepository) {
         http.cors(httpSecurityCorsConfigurer -> httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource()));
 
         return http.oauth2AuthorizationServer(authorizationServer -> {
             http.securityMatcher(authorizationServer.getEndpointsMatcher())
                 .with(authorizationServer, Customizer.withDefaults())
+                .authorizeHttpRequests(authorize -> authorize
+                        .anyRequest().authenticated()
+                )
                 .exceptionHandling(e -> e.accessDeniedPage("/accessdenied")
-                                         .defaultAuthenticationEntryPointFor(new LoginUrlAuthenticationEntryPoint("/login"), new MediaTypeRequestMatcher(MediaType.TEXT_HTML)));
+                                         .defaultAuthenticationEntryPointFor(new LoginUrlAuthenticationEntryPoint(
+                                                 "/login"), new MediaTypeRequestMatcher(MediaType.TEXT_HTML)));
             authorizationServer
+                    .registeredClientRepository(registeredClientRepository)
+                    .oidc(Customizer.withDefaults())
                     .tokenGenerator(tokenGenerator())
                     .clientAuthentication(authentication -> {
                         authentication.authenticationConverter(new ClientRefreshTokenAuthenticationConverter());
-                        authentication.authenticationProvider(new ClientAuthenticationProvider(registeredClientRepository));
-                    }).oidc(Customizer.withDefaults());
+                        authentication.authenticationProvider(new ClientAuthenticationProvider(
+                                registeredClientRepository));
+                    });
         }).build();
     }
 
@@ -100,10 +107,33 @@ public class AuthorizationServerConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         var corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowCredentials(true);
-        corsConfiguration.setAllowedOrigins(List.of("http://securedoc.com", "http://localhost:3000", "http://localhost:4200", "http://localhost:4200", "100.14.214.212:3000", "http://96.255.228.129:3000", "http://localhost:4200", "http://localhost:4200", "http://localhost:3000", "http://securecapita.org", "http://192.168.1.216:3000"));
-        corsConfiguration.setAllowedHeaders(Arrays.asList(ORIGIN, ACCESS_CONTROL_ALLOW_ORIGIN, CONTENT_TYPE, ACCEPT, AUTHORIZATION, "X_REQUESTED_WITH", ACCESS_CONTROL_REQUEST_METHOD, ACCESS_CONTROL_REQUEST_HEADERS, ACCESS_CONTROL_ALLOW_CREDENTIALS));
-        corsConfiguration.setExposedHeaders(Arrays.asList(ORIGIN, ACCESS_CONTROL_ALLOW_ORIGIN, CONTENT_TYPE, ACCEPT, AUTHORIZATION, "X_REQUESTED_WITH", ACCESS_CONTROL_REQUEST_METHOD, ACCESS_CONTROL_REQUEST_HEADERS, ACCESS_CONTROL_ALLOW_CREDENTIALS));
-        corsConfiguration.setAllowedMethods(Arrays.asList(GET.name(), POST.name(), PUT.name(), PATCH.name(), DELETE.name(), OPTIONS.name()));
+        corsConfiguration.setAllowedOrigins(List.of("http://securedoc.com",
+                "http://localhost:3000",
+                "http://localhost:4200"));
+        corsConfiguration.setAllowedHeaders(Arrays.asList(ORIGIN,
+                ACCESS_CONTROL_ALLOW_ORIGIN,
+                CONTENT_TYPE,
+                ACCEPT,
+                AUTHORIZATION,
+                "X_REQUESTED_WITH",
+                ACCESS_CONTROL_REQUEST_METHOD,
+                ACCESS_CONTROL_REQUEST_HEADERS,
+                ACCESS_CONTROL_ALLOW_CREDENTIALS));
+        corsConfiguration.setExposedHeaders(Arrays.asList(ORIGIN,
+                ACCESS_CONTROL_ALLOW_ORIGIN,
+                CONTENT_TYPE,
+                ACCEPT,
+                AUTHORIZATION,
+                "X_REQUESTED_WITH",
+                ACCESS_CONTROL_REQUEST_METHOD,
+                ACCESS_CONTROL_REQUEST_HEADERS,
+                ACCESS_CONTROL_ALLOW_CREDENTIALS));
+        corsConfiguration.setAllowedMethods(Arrays.asList(GET.name(),
+                POST.name(),
+                PUT.name(),
+                PATCH.name(),
+                DELETE.name(),
+                OPTIONS.name()));
         corsConfiguration.setMaxAge(3600L);
         var source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/", corsConfiguration);

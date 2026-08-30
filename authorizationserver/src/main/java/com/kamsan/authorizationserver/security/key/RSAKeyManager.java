@@ -38,8 +38,11 @@ public class RSAKeyManager {
         var keysDirectory = Paths.get("src", "main", "resources", "keys");
         verifyKeysDirectory(keysDirectory);
         // case : Dev environement && les fichiers clés public & privé existent déjà.
-        if (Files.exists(keysDirectory.resolve(publicKeyFileName)) && Files.exists(keysDirectory.resolve(privateKeyFileName))) {
-            log.info("RSA keys already exist. Loading keys from file paths: {}, {}", publicKeyFileName, privateKeyFileName);
+        if (Files.exists(keysDirectory.resolve(publicKeyFileName)) && Files.exists(keysDirectory.resolve(
+                privateKeyFileName))) {
+            log.info("RSA keys already exist. Loading keys from file paths: {}, {}",
+                    publicKeyFileName,
+                    privateKeyFileName);
             try {
                 var privateKeyFile = keysDirectory.resolve(privateKeyFileName).toFile();
                 var publicKeyFile = keysDirectory.resolve(publicKeyFileName).toFile();
@@ -53,7 +56,7 @@ public class RSAKeyManager {
                 byte[] privateKeyBytes = Files.readAllBytes(privateKeyFile.toPath());
                 PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
                 RSAPrivateKey privateKey = (RSAPrivateKey) keyFactory.generatePrivate(privateKeySpec);
-                var keyId = UUID.randomUUID().toString();
+                var keyId = "eb0f85b4-22bb-4856-8357-5b1ac0d06c1c"; //UUID.randomUUID().toString();
                 log.info("Key id : {}", keyId);
                 return new RSAKey.Builder(publicKey).privateKey(privateKey).keyID(keyId).build();
             } catch (Exception ex) {

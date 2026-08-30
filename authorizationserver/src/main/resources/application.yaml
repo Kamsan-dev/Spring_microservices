@@ -24,6 +24,10 @@ spring:
         default_schema: public
         format_sql: true
 
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG
 
 eureka:
   instance:

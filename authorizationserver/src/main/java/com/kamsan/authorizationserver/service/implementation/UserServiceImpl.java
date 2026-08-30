@@ -2,6 +2,7 @@ package com.kamsan.authorizationserver.service.implementation;
 
 import com.kamsan.authorizationserver.model.User;
 import com.kamsan.authorizationserver.repository.UserRepository;
+import com.kamsan.authorizationserver.repository.UserSecurityProjection;
 import com.kamsan.authorizationserver.service.UserService;
 import com.kamsan.authorizationserver.sharedkernel.exception.ApiException;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,14 @@ public class UserServiceImpl implements UserService {
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(
                 () -> new UsernameNotFoundException(String.format("Email address %s does not exist", email)));
+    }
+
+    @Override
+    public UserSecurityProjection getUserSecurityData(UUID publicId) {
+        return userRepository.findSecurityDataByPublicId(publicId)
+                             .orElseThrow(() -> new ApiException(String.format(
+                                     "User with public id %s does not exist.",
+                                     publicId)));
     }
 
     @Override

@@ -1,9 +1,11 @@
 package com.kamsan.authorizationserver.security.authentication.user;
 
 import com.kamsan.authorizationserver.model.User;
+import com.kamsan.authorizationserver.repository.UserSecurityProjection;
 import com.kamsan.authorizationserver.service.implementation.UserServiceImpl;
 import com.kamsan.authorizationserver.sharedkernel.exception.ApiException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
@@ -18,6 +20,7 @@ import static org.springframework.security.core.authority.AuthorityUtils.commaSe
 
 @RequiredArgsConstructor
 @Component
+@Slf4j
 public class UserAuthenticationProvider implements AuthenticationProvider {
     private final UserServiceImpl userService;
     private final BCryptPasswordEncoder passwordEncoder;
@@ -27,10 +30,13 @@ public class UserAuthenticationProvider implements AuthenticationProvider {
         try {
             User user = userService.getUserByEmail((String) authentication.getPrincipal());
             validateUser.accept(user);
-            if (passwordEncoder.matches((String) authentication.getCredentials(), user.getPassword())) {
+            UserSecurityProjection userSecurityData = userService.getUserSecurityData(user.getUserPublicId());
+            if (passwordEncoder.matches((String) authentication.getCredentials(), userSecurityData.getPassword())) {
                 // 3ème parametre -> liste de GrantedAuthorities, exemple : role_admin,ticket:create,ticket:delete...
                 // return new UsernamePasswordAuthenticationToken
-                return authenticated(user, "[PROTECTED]", commaSeparatedStringToAuthorityList(user.getRole() + "," + user.getAuthorities()));
+                return authenticated(user,
+                        "[PROTECTED]",
+                        commaSeparatedStringToAuthorityList(userSecurityData.getRole() + "," + userSecurityData.getAuthorities()));
             } else {
                 throw new BadCredentialsException("Incorrect email/password. Please try again.");
             }
