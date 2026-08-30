@@ -28,7 +28,7 @@ public class ApiAuthenticationEventListener {
         if (event.getAuthentication() instanceof UsernamePasswordAuthenticationToken) {
             User user = getUser(event.getAuthentication());
             userService.setLastLogin(user.getUserId());
-            userService.resetLoginAttempts(user.getPublicId());
+            userService.resetLoginAttempts(user.getUserPublicId());
             userService.addLoginDevice(user.getUserId(), getDevice(request), getClient(request), getIpAddress(request));
         }
     }

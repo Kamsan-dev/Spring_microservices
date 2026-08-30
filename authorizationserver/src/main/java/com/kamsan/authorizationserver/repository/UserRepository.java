@@ -11,13 +11,13 @@ import java.util.UUID;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
-    Optional<User> findByPublicId(UUID userPublicId);
+    Optional<User> findByUserPublicId(UUID userPublicId);
 
-    void resetLoginAttempts(UUID userPublicId);
-
-    void updateLoginAttempts(String email);
-
-    void setLastLogin(Long userId);
-
-    void addLoginDevice(Long userId, String deviceName, String client, String ipAddress);
+//    void resetLoginAttempts(UUID userPublicId);
+//
+//    void updateLoginAttempts(String email);
+//
+//    void setLastLogin(Long userId);
+//
+//    void addLoginDevice(Long userId, String deviceName, String client, String ipAddress);
 }

@@ -35,8 +35,8 @@ eureka:
   client:
     service-url:
       defaultZone: http://${USER_NAME}:${PASSWORD}@localhost:5002/eureka/
-    fetch-registry: false
-    register-with-eureka: false
+    fetch-registry: true
+    register-with-eureka: true
 
 
 server:

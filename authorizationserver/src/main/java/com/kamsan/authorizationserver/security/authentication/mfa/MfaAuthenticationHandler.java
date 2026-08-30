@@ -33,7 +33,7 @@ public class MfaAuthenticationHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         if (authentication instanceof UsernamePasswordAuthenticationToken) {
             var user = (User) authentication.getPrincipal();
-            if (!user.isUsingMFA()) {
+            if (!user.isUsingMfa()) {
                 this.mfaNotEnabled.onAuthenticationSuccess(request, response, authentication);
                 return;
             }

@@ -1,8 +1,6 @@
 package com.kamsan.authorizationserver;
 
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -26,8 +24,7 @@ import static java.util.UUID.randomUUID;
 @Slf4j
 public class Application {
 
-    private static final Logger log = LoggerFactory.getLogger(Application.class);
-    @Value("${ui_app_url}")
+    @Value("${ui.app.url}")
     private String redirectUri;
 
     public static void main(String[] args) {
@@ -40,22 +37,29 @@ public class Application {
             if (registeredClientRepository.findByClientId("client") == null) {
                 try {
                     var registerClient = RegisteredClient.withId(randomUUID().toString())
-                            .clientId("client")
-                            .clientSecret("secret")
-                            .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
-                            .authorizationGrantTypes(types -> {
-                                types.add(AuthorizationGrantType.AUTHORIZATION_CODE);
-                                types.add(AuthorizationGrantType.REFRESH_TOKEN);
-                            })
-                            .scopes(scopes -> {
-                                scopes.add(OidcScopes.OPENID);
-                                scopes.add(OidcScopes.PROFILE);
-                                scopes.add(OidcScopes.EMAIL);
-                            })
-                            .redirectUri(redirectUri)
-                            .postLogoutRedirectUri("http://127.0.0.1:8080")
-                            .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
-                            .tokenSettings(TokenSettings.builder().refreshTokenTimeToLive(Duration.ofDays(90)).accessTokenTimeToLive(Duration.ofDays(1)).build()).build();
+                                                         .clientId("client")
+                                                         .clientSecret("secret")
+                                                         .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
+                                                         .authorizationGrantTypes(types -> {
+                                                             types.add(AuthorizationGrantType.AUTHORIZATION_CODE);
+                                                             types.add(AuthorizationGrantType.REFRESH_TOKEN);
+                                                         })
+                                                         .scopes(scopes -> {
+                                                             scopes.add(OidcScopes.OPENID);
+                                                             scopes.add(OidcScopes.PROFILE);
+                                                             scopes.add(OidcScopes.EMAIL);
+                                                         })
+                                                         .redirectUri(redirectUri)
+                                                         .postLogoutRedirectUri("http://127.0.0.1:8080")
+                                                         .clientSettings(ClientSettings.builder()
+                                                                                       .requireAuthorizationConsent(true)
+                                                                                       .build())
+                                                         .tokenSettings(TokenSettings.builder()
+                                                                                     .refreshTokenTimeToLive(Duration.ofDays(
+                                                                                             90))
+                                                                                     .accessTokenTimeToLive(Duration.ofDays(
+                                                                                             1))
+                                                                                     .build()).build();
 
                     registeredClientRepository.save(registerClient);
                 } catch (Exception e) {

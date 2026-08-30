@@ -29,7 +29,7 @@ public class DiscoveryUserDetailsService implements UserDetailsService {
                                              .orElseThrow(() -> new ApiException(String.format(
                                                      "User with public id %s does not exist.",
                                                      user.getUserPublicId())));
-
+        
         return new User(user.getUsername(), userSecurityData.getPassword(), user.isAccountEnabled(),
                 !user.isAccountExpired(), !userSecurityData.getCredentialsExpired(), !user.isAccountLocked(),
                 commaSeparatedStringToAuthorityList(userSecurityData.getRole() + "," + userSecurityData.getAuthorities()));

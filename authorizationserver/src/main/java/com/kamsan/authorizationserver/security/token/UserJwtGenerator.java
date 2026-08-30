@@ -48,9 +48,10 @@ public class UserJwtGenerator implements OAuth2TokenGenerator<Jwt> {
         if (!OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType()) && !OidcParameterNames.ID_TOKEN.equals(context.getTokenType()
                                                                                                                        .getValue())) {
             return null;
-        } else if (OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType()) && !OAuth2TokenFormat.SELF_CONTAINED.equals(context.getRegisteredClient()
-                                                                                                                                  .getTokenSettings()
-                                                                                                                                  .getAccessTokenFormat())) {
+        } else if (OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType()) && !OAuth2TokenFormat.SELF_CONTAINED.equals(
+                context.getRegisteredClient()
+                       .getTokenSettings()
+                       .getAccessTokenFormat())) {
             return null;
         } else {
             RegisteredClient registeredClient = context.getRegisteredClient();
@@ -72,7 +73,7 @@ public class UserJwtGenerator implements OAuth2TokenGenerator<Jwt> {
             Assert.notNull(authorizationGrantType, "authorizationGrantType cannot be null");
             JwtClaimsSet.Builder claimsBuilder = JwtClaimsSet.builder()
                                                              .issuer(issuer)
-                                                             .subject(user.getPublicId().toString())
+                                                             .subject(user.getUserPublicId().toString())
                                                              .audience(Collections.singletonList(registeredClient.getClientId()))
                                                              .issuedAt(issuedAt)
                                                              .expiresAt(expiresAt)
@@ -88,7 +89,8 @@ public class UserJwtGenerator implements OAuth2TokenGenerator<Jwt> {
                 if (AuthorizationGrantType.AUTHORIZATION_CODE.equals(authorizationGrantType)) {
                     OAuth2Authorization authorization = context.getAuthorization();
                     Assert.notNull(authorization, "authorization cannot be null");
-                    OAuth2AuthorizationRequest authorizationRequest = (OAuth2AuthorizationRequest) authorization.getAttribute(OAuth2AuthorizationRequest.class.getName());
+                    OAuth2AuthorizationRequest authorizationRequest = (OAuth2AuthorizationRequest) authorization.getAttribute(
+                            OAuth2AuthorizationRequest.class.getName());
                     Assert.notNull(authorizationRequest, "authorizationRequest cannot be null");
                     String nonce = (String) authorizationRequest.getAdditionalParameters().get("nonce");
                     if (StringUtils.hasText(nonce)) {
@@ -126,7 +128,8 @@ public class UserJwtGenerator implements OAuth2TokenGenerator<Jwt> {
                                                                                  .authorizationServerContext(context.getAuthorizationServerContext())
                                                                                  .authorizedScopes(context.getAuthorizedScopes())
                                                                                  .tokenType(context.getTokenType())
-                                                                                 .authorizationGrantType(authorizationGrantType);
+                                                                                 .authorizationGrantType(
+                                                                                         authorizationGrantType);
                 if (context.getAuthorization() != null) {
                     jwtContextBuilder.authorization(context.getAuthorization());
                 }

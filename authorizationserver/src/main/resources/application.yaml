@@ -15,15 +15,13 @@ spring:
   jpa:
     database: POSTGRESQL
     open-in-view: false
-    database-plateform: org.hibernate.dialect.PostgresSQL82Dialect
     generate-ddl: false
     show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     properties:
       hibernate:
-        default_schema: ${POSTGRES_DATABASE}
-        dialect: org.hibernate.dialect.PostgresSQL82Dialect
+        default_schema: public
         format_sql: true
 
 
@@ -33,6 +31,7 @@ eureka:
   client:
     service-url:
       defaultZone: http://${USER_NAME}:${PASSWORD}@localhost:5002/eureka/
+      register-with-eureka: true
 
 ui:
   app:

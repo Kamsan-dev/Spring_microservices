@@ -25,28 +25,30 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void resetLoginAttempts(UUID userPublicId) {
-        userRepository.resetLoginAttempts(userPublicId);
+        //userRepository.resetLoginAttempts(userPublicId);
     }
 
     @Override
     public void updateLoginAttempts(String email) {
-        userRepository.updateLoginAttempts(email);
+        //userRepository.updateLoginAttempts(email);
     }
 
     @Override
     public void setLastLogin(Long userId) {
-        userRepository.setLastLogin(userId);
+        //userRepository.setLastLogin(userId);
     }
 
     @Override
     public void addLoginDevice(Long userId, String deviceName, String client, String ipAddress) {
-        userRepository.addLoginDevice(userId, deviceName, client, ipAddress);
+        //userRepository.addLoginDevice(userId, deviceName, client, ipAddress);
     }
 
     @Override
     public boolean isValidQRCode(UUID userPublicId, String code) {
-        var user = userRepository.findByPublicId(userPublicId)
-                                 .orElseThrow(() -> new ApiException(String.format("User with public id %s does not exist", userPublicId)));
+        var user = userRepository.findByUserPublicId(userPublicId)
+                                 .orElseThrow(() -> new ApiException(String.format(
+                                         "User with public id %s does not exist",
+                                         userPublicId)));
         return verifyQrCode(user.getQrCodeSecret(), code);
     }
 }

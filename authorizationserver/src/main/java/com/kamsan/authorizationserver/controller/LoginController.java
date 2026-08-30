@@ -25,7 +25,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
@@ -38,7 +37,8 @@ import static com.kamsan.authorizationserver.utils.UserUtils.getUser;
 public class LoginController {
     private final UserService userService;
     private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
-    private final AuthenticationFailureHandler authenticationFailureHandler = new SimpleUrlAuthenticationFailureHandler("/mfa?error");
+    private final AuthenticationFailureHandler authenticationFailureHandler = new SimpleUrlAuthenticationFailureHandler(
+            "/mfa?error");
     private final AuthenticationSuccessHandler authenticationSuccessHandler;
 
     @GetMapping("/login")
@@ -55,11 +55,15 @@ public class LoginController {
     @PostMapping("/mfa")
     public void validateCode(@RequestParam("code") String code, HttpServletRequest request, HttpServletResponse response, @CurrentSecurityContext SecurityContext securityContext) throws ServletException, IOException {
         var user = getUser(securityContext.getAuthentication());
-        if (userService.isValidQRCode(user.getPublicId(), code)) {
-            this.authenticationSuccessHandler.onAuthenticationSuccess(request, response, getSavedAuthentication(request, response));
+        if (userService.isValidQRCode(user.getUserPublicId(), code)) {
+            this.authenticationSuccessHandler.onAuthenticationSuccess(request,
+                    response,
+                    getSavedAuthentication(request, response));
             return;
         } else {
-            this.authenticationFailureHandler.onAuthenticationFailure(request, response, new BadCredentialsException("Invalid QR code. Please try again"));
+            this.authenticationFailureHandler.onAuthenticationFailure(request,
+                    response,
+                    new BadCredentialsException("Invalid QR code. Please try again"));
         }
     }
 
@@ -68,7 +72,7 @@ public class LoginController {
         return "logout";
     }
 
-    @RequestMapping("/error")
+    @GetMapping("/error")
     public String error(HttpServletRequest request, Model model) {
         var errorException = (Exception) request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
         if (errorException instanceof ApiException || errorException instanceof BadCredentialsException) {

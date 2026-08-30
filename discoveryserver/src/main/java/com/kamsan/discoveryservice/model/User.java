@@ -41,6 +41,8 @@ public class User {
     private String role;
     @Transient
     private String authorities;
+    @Transient
+    private String password;
 
     private boolean isAccountExpired;
     private boolean isAccountLocked;
