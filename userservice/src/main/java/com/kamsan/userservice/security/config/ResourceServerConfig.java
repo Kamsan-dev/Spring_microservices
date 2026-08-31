@@ -1,8 +1,8 @@
-package com.kamsan.gateway.security.config;
+package com.kamsan.userservice.security.config;
 
-import com.kamsan.gateway.security.handler.GatewayAccessDeniedHandler;
-import com.kamsan.gateway.security.handler.GatewayAuthenticationEntryPoint;
-import com.kamsan.gateway.security.token.JwtConverter;
+import com.kamsan.userservice.security.handler.CustomAccessDeniedHandler;
+import com.kamsan.userservice.security.handler.CustomAuthenticationEntryPoint;
+import com.kamsan.userservice.security.token.JwtConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,8 +46,8 @@ public class ResourceServerConfig {
                     .anyRequest()
                     .authenticated())
             .oauth2ResourceServer(oauth2 -> oauth2
-                    .accessDeniedHandler(new GatewayAccessDeniedHandler())
-                    .authenticationEntryPoint(new GatewayAuthenticationEntryPoint())
+                    .accessDeniedHandler(new CustomAccessDeniedHandler())
+                    .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
                     .jwt(jwt -> jwt
                             .jwkSetUri(jwkSetUri)
                             .jwtAuthenticationConverter(new JwtConverter())));
@@ -91,4 +91,3 @@ public class ResourceServerConfig {
         return source;
     }
 }
-
