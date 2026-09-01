@@ -16,7 +16,7 @@ public interface UserService {
 
     ReadUserDTO updateUser(UpdateUserDTO updateUserDTO);
 
-    ReadUserDTO createUser(CreateUserDTO createUserDTO);
+    void createUser(CreateUserDTO createUserDTO);
 
     void verifyAccount(String token);
 

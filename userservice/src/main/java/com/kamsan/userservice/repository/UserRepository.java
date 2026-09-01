@@ -3,6 +3,8 @@ package com.kamsan.userservice.repository;
 import com.kamsan.userservice.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.query.Procedure;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -13,6 +15,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     Optional<User> findByUserPublicId(UUID userPublicId);
+
+    Optional<User> findByUserId(Long id);
+
+    boolean existsByEmail(String email);
 
     @Query(value = """
             SELECT  c.password AS password,
@@ -27,11 +33,22 @@ public interface UserRepository extends JpaRepository<User, Long> {
             """, nativeQuery = true)
     Optional<UserSecurityProjection> findSecurityDataByPublicId(UUID publicId);
 
-//    void resetLoginAttempts(UUID userPublicId);
-//
-//    void updateLoginAttempts(String email);
-//
-//    void setLastLogin(Long userId);
-//
-//    void addLoginDevice(Long userId, String deviceName, String client, String ipAddress);
+    @Procedure(procedureName = "public.create_user")
+    void createUser(
+            @Param("p_email") String email,
+            @Param("p_password") String password,
+            @Param("p_first_name") String firstName,
+            @Param("p_last_name") String lastName,
+            @Param("p_username") String username,
+            @Param("p_public_id") String userPublicId,
+            @Param("p_credential_public_id") String credentialPublicId,
+            @Param("p_token") String token,
+            @Param("p_member_id") String memberId
+    );
+
+    @Query(value = """
+            UPDATE users SET is_account_enabled = TRUE WHERE user_id = :userId
+            """, nativeQuery = true)
+    void updateUserSettings(Long userId);
+
 }

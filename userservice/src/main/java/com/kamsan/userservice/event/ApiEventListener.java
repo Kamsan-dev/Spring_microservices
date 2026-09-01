@@ -1,4 +1,4 @@
-package com.kamsan.userservice.security.listener;
+package com.kamsan.userservice.event;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
