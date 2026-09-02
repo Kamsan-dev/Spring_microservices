@@ -51,4 +51,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
             """, nativeQuery = true)
     void updateUserSettings(Long userId);
 
+    @Query(value = """
+            UPDATE users SET is_using_mfa = FALSE where user_public_id = :publicId
+            """, nativeQuery = true)
+    void disableMfa(UUID publicId);
+
 }

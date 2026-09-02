@@ -10,6 +10,7 @@ import com.kamsan.userservice.repository.UserRepository;
 import com.kamsan.userservice.repository.UserSecurityProjection;
 import com.kamsan.userservice.service.UserService;
 import com.kamsan.userservice.sharedkernel.exception.ApiException;
+import com.kamsan.userservice.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
@@ -53,11 +54,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public ReadUserDTO getUserByPublicId(UUID publicId) {
-        User user = userRepository.findByUserPublicId(publicId).orElseThrow(
-                () -> new ApiException(String.format(
-                        "User with public id %s does not exist.",
-                        publicId)));
-
+        var user = this.getUserByUUID(publicId);
         return userMapper.userToReadUserDTO(user);
     }
 
@@ -73,12 +70,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public ReadUserDTO updateUser(UpdateUserDTO updateUserDTO) {
-        UUID userPublicId = updateUserDTO.userPublicId();
-        var user = userRepository.findByUserPublicId(userPublicId).orElseThrow(
-                () -> new ApiException(String.format(
-                        "User with public id %s does not exist.",
-                        userPublicId)));
-
+        var user = this.getUserByUUID(updateUserDTO.userPublicId());
         userMapper.updateUser(updateUserDTO, user);
         return userMapper.userToReadUserDTO(userRepository.save(user));
     }
@@ -154,8 +146,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public ReadUserDTO enableMfa(UUID userPublicId) {
-        return null;
+        var user = this.getUserByUUID(userPublicId);
+
+        String qrCodeSecret = UserUtils.qrCodeSecret.get();
+        String qrCodeImageUri = UserUtils.qrCodeImageUri.apply(qrCodeSecret);
+
+        user.setQrCodeSecret(qrCodeSecret);
+        user.setQrCodeImageUri(qrCodeImageUri);
+        user.setUsingMfa(true);
+
+        return userMapper.userToReadUserDTO(user);
     }
 
     @Override
@@ -226,5 +228,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public ReadUserDTO updateRole(UUID userPublicId, String role) {
         return null;
+    }
+
+    private User getUserByUUID(UUID publicId) {
+        return userRepository.findByUserPublicId(publicId).orElseThrow(
+                () -> new ApiException(String.format(
+                        "User with public id %s does not exist.",
+                        publicId)));
     }
 }
