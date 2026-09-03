@@ -43,3 +43,6 @@ ui:
 
 jwks:
   uri: ${JWKS_URI}
+
+user:
+  images-folder: ${IMAGES_URI}

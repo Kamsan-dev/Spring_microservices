@@ -33,6 +33,16 @@ public interface UserRepository extends JpaRepository<User, Long> {
             """, nativeQuery = true)
     Optional<UserSecurityProjection> findSecurityDataByPublicId(UUID publicId);
 
+    @Query(value = """
+            SELECT  r.name AS role,
+                    r.authority AS authorities
+                    FROM users u
+                    JOIN user_roles ur ON ur.user_id = u.user_id
+                    JOIN roles r ON r.role_id = ur.role_id
+                    WHERE u.user_public_id = :publicId
+            """, nativeQuery = true)
+    UserRoleAndAuthoritiesProjection findRoleAndAuthorities(UUID publicId);
+
     @Procedure(procedureName = "public.create_user")
     void createUser(
             @Param("p_email") String email,
@@ -52,8 +62,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     void updateUserSettings(Long userId);
 
     @Query(value = """
-            UPDATE users SET is_using_mfa = FALSE where user_public_id = :publicId
+            UPDATE user_roles ur SET ur.role_id = :roleId
+            WHERE ur.user_id = :userId
             """, nativeQuery = true)
-    void disableMfa(UUID publicId);
+    void updateUserRole(Long userId, Long roleId);
 
 }
