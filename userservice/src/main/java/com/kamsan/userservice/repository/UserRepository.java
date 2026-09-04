@@ -1,6 +1,8 @@
 package com.kamsan.userservice.repository;
 
 import com.kamsan.userservice.model.User;
+import com.kamsan.userservice.repository.projection.UserRoleAndAuthoritiesProjection;
+import com.kamsan.userservice.repository.projection.UserSecurityProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.query.Procedure;

@@ -6,6 +6,7 @@ import java.util.UUID;
 public record CredentialDTO(
         UUID credentialPublicId,
         String password,
+        boolean isExpired,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt) {
 }

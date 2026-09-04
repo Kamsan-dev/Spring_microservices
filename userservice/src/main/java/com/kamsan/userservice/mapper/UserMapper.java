@@ -2,7 +2,6 @@ package com.kamsan.userservice.mapper;
 
 import com.kamsan.userservice.dto.*;
 import com.kamsan.userservice.model.Credential;
-import com.kamsan.userservice.model.Device;
 import com.kamsan.userservice.model.User;
 import org.mapstruct.*;
 

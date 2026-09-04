@@ -4,9 +4,11 @@ import com.kamsan.userservice.domain.UserProperties;
 import com.kamsan.userservice.dto.*;
 import com.kamsan.userservice.event.Event;
 import com.kamsan.userservice.mapper.UserMapper;
+import com.kamsan.userservice.model.PasswordToken;
 import com.kamsan.userservice.model.Role;
 import com.kamsan.userservice.model.User;
 import com.kamsan.userservice.repository.*;
+import com.kamsan.userservice.repository.projection.UserSecurityProjection;
 import com.kamsan.userservice.service.UserService;
 import com.kamsan.userservice.sharedkernel.exception.ApiException;
 import com.kamsan.userservice.utils.UserUtils;
@@ -14,6 +16,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -40,6 +45,7 @@ import static org.apache.commons.lang3.text.WordUtils.capitalizeFully;
 @Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final UserQueryRepository userQueryRepository;
     private final AccountTokenRepository accountTokenRepository;
     private final PasswordTokenRepository passwordTokenRepository;
     private final CredentialRepository credentialRepository;
@@ -140,24 +146,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public ReadUserDTO verifyPasswordToken(String token) {
-        var passwordToken = passwordTokenRepository.findByToken(token)
-                                                   .orElseThrow(() -> new ApiException(
-                                                           "Invalid link. Please try again."));
-
-        if (passwordToken.isExpired()) {
-            throw new ApiException("Link has expired. Please try again.");
-        }
-        passwordTokenRepository.deleteByToken(token);
-        var user = userRepository.findByUserId(passwordToken.getUserId())
-                                 .orElseThrow(() -> new ApiException(String.format(
-                                         "User with id %s does not exist.",
-                                         passwordToken.getUserId())));
-        return userMapper.userToReadUserDTO(user);
-    }
-
-    @Override
-    @Transactional
     public ReadUserDTO enableMfa(UUID userPublicId) {
         var user = this.getUserByUUID(userPublicId);
 
@@ -193,12 +181,13 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void updatePassword(ChangePasswordDTO changePasswordDTO) {
-        User user = this.getUserByUUID(changePasswordDTO.userPublicId());
-
         if (!Objects.equals(changePasswordDTO.newPassword(), changePasswordDTO.confirmNewPassword())) {
             throw new ApiException("Passwords don't match. Please try again");
         }
-        var credential = credentialRepository.findByUserId(user.getUserPublicId()).orElseThrow(
+
+        User user = this.getUserByUUID(changePasswordDTO.userPublicId());
+
+        var credential = credentialRepository.findByUserId(user.getUserId()).orElseThrow(
                 () -> new ApiException(String.format("Unable to retrieve credential for user with publicId %s",
                         user.getUserPublicId())));
 
@@ -209,44 +198,101 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void resetPassword(String email) {
-        // Verification email unique
-        boolean isEmailUsed = userRepository.existsByEmail(email);
-        if (!isEmailUsed) {
-            throw new ApiException(String.format("Cannot reset password. Email %s does not exist.",
-                    email));
+        User user = userRepository.findByEmail(email)
+                                  .orElseThrow(() -> new UsernameNotFoundException(
+                                          String.format("Email address %s does not exist", email)));
+
+        Optional<PasswordToken> tokenOpt =
+                passwordTokenRepository.findByUserId(user.getUserId());
+
+        if (tokenOpt.isPresent()) {
+            PasswordToken passwordToken = tokenOpt.get();
+            if (!passwordToken.isExpired()) {
+                return;
+            } else {
+                passwordTokenRepository.deleteByToken(passwordToken.getToken());
+            }
         }
-        String token = randomUUID.get().toString();
-        publisher.publishEvent(new Event(RESETPASSWORD,
-                Map.of("token",
-                        token,
-                        "email",
-                        email)));
+
+        PasswordToken newToken = PasswordToken.builder()
+                                              .userId(user.getUserId())
+                                              .token(randomUUID.get().toString())
+                                              .build();
+        passwordTokenRepository.save(newToken);
+        publisher.publishEvent(new Event(
+                RESETPASSWORD,
+                Map.of(
+                        "token", newToken.getToken(),
+                        "email", email,
+                        "name", capitalizeFully(user.getFirstName())
+                )
+        ));
     }
 
     @Override
+    @Transactional
     public void doResetPassword(DoResetPasswordDTO doResetPasswordDTO) {
+        if (!Objects.equals(doResetPasswordDTO.password(), doResetPasswordDTO.confirmPassword())) {
+            throw new ApiException("Passwords don't match. Please try again");
+        }
+        User tokenOwner = verifyPasswordToken(doResetPasswordDTO.token());
+        var credential = credentialRepository.findByUserId(tokenOwner.getUserId()).orElseThrow(
+                () -> new ApiException(String.format("Unable to retrieve credential for user with id %s",
+                        tokenOwner.getUserId())));
+        credential.setPassword(encoder.encode(doResetPasswordDTO.password()));
+        passwordTokenRepository.deleteByToken(doResetPasswordDTO.token());
+    }
 
+    /**
+     * Vérifie la validité du token et l'existance de l'utilisateur lié à ce token.
+     *
+     * @param token
+     * @return
+     */
+    private User verifyPasswordToken(String token) {
+        var passwordToken = passwordTokenRepository.findByToken(token)
+                                                   .orElseThrow(() -> new ApiException(
+                                                           "Invalid link. Please try again."));
+
+        if (passwordToken.isExpired()) {
+            throw new ApiException("Link has expired. Please try again.");
+        }
+        return userRepository.findByUserId(passwordToken.getUserId())
+                             .orElseThrow(() -> new ApiException(String.format(
+                                     "User with id %s does not exist.",
+                                     passwordToken.getUserId())));
     }
 
     @Override
-    public List<ReadUserDTO> getUsers() {
-        return List.of();
+    @Transactional(readOnly = true)
+    public Page<PageUserDTO> getUsers(Pageable page) {
+        List<PageUserDTO> users = userQueryRepository.getUsersPage(page);
+        Long total = userQueryRepository.countTotalUsers();
+
+        return new PageImpl<>(users, page, total);
     }
 
     @Override
-    public ReadUserDTO getAssignee(UUID userPublicId) {
-        return null;
+    @Transactional(readOnly = true)
+    public TicketUserDTO getAssignee(UUID ticketPublicId) {
+        return userQueryRepository.getAssignee(ticketPublicId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CredentialDTO getCredential(UUID userPublicId) {
-        return null;
+        var credential = credentialRepository.findByUserPublicId(userPublicId).orElseThrow(
+                () -> new ApiException(String.format("Unable to retrieve credential for user with public id %s",
+                        userPublicId)));
+
+        return userMapper.credentialToCredentialDTO(credential);
     }
 
     @Override
     public List<DeviceDTO> getDevices(UUID userPublicId) {
-        return List.of();
+        return userQueryRepository.getUserDevices(userPublicId);
     }
 
     @Override

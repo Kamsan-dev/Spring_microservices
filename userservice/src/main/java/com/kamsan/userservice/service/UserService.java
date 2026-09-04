@@ -1,7 +1,9 @@
 package com.kamsan.userservice.service;
 
 import com.kamsan.userservice.dto.*;
-import com.kamsan.userservice.repository.UserSecurityProjection;
+import com.kamsan.userservice.repository.projection.UserSecurityProjection;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -20,8 +22,6 @@ public interface UserService {
 
     void verifyAccount(String token);
 
-    ReadUserDTO verifyPasswordToken(String token);
-
     ReadUserDTO enableMfa(UUID userPublicId);
 
     ReadUserDTO disableMfa(UUID userPublicId);
@@ -34,9 +34,9 @@ public interface UserService {
 
     void doResetPassword(DoResetPasswordDTO doResetPasswordDTO);
 
-    List<ReadUserDTO> getUsers();
+    Page<PageUserDTO> getUsers(Pageable page);
 
-    ReadUserDTO getAssignee(UUID userPublicId);
+    TicketUserDTO getAssignee(UUID ticketPublicId);
 
     CredentialDTO getCredential(UUID userPublicId);
 
