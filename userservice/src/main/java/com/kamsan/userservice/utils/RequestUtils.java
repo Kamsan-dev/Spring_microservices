@@ -1,6 +1,7 @@
 package com.kamsan.userservice.utils;
 
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import com.kamsan.userservice.domain.ApiResponse;
 import com.kamsan.userservice.domain.Response;
 import com.kamsan.userservice.sharedkernel.exception.ApiException;
 import jakarta.servlet.ServletOutputStream;
@@ -14,6 +15,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.time.OffsetDateTime;
 import java.util.Collections;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
@@ -83,6 +85,10 @@ public class RequestUtils {
             var apiResponse = getErrorResponse(request, response, exception, INTERNAL_SERVER_ERROR);
             writeResponse.accept(response, apiResponse);
         }
+    }
+    
+    public static ApiResponse getResponse(Map<String, ?> data, String message, HttpStatus status) {
+        return new ApiResponse(status.value(), message, data);
     }
 
     private static Response getErrorResponse(HttpServletRequest request, HttpServletResponse response, Exception exception, HttpStatus httpStatus) {
